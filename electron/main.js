@@ -37,7 +37,7 @@ function createWindow() {
     minWidth: 800,
     minHeight: 500,
     titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 15, y: 15 },
+    trafficLightPosition: { x: 16, y: 12 },
     backgroundColor: '#020617',
     webPreferences: {
       nodeIntegration: false,
@@ -48,8 +48,21 @@ function createWindow() {
 
   mainWindow.loadURL(`http://localhost:${PORT}`);
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
+  // Open external links in default browser, not Electron
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http')) {
+      require('electron').shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+
+  // Wait for page to fully render before showing
+  mainWindow.webContents.on('did-finish-load', () => {
+    setTimeout(() => {
+      if (mainWindow && !mainWindow.isVisible()) {
+        mainWindow.show();
+      }
+    }, 300);
   });
 
   mainWindow.on('close', (e) => {
@@ -144,15 +157,20 @@ function updateTrayMenu(count) {
 app.whenReady().then(() => {
   startServer();
 
-  // Wait for server to be ready
+  // Wait for server to be fully ready
   const check = setInterval(async () => {
     try {
-      await fetch(`http://localhost:${PORT}/api/ports`);
-      clearInterval(check);
-      createWindow();
-      createTray();
+      const res = await fetch(`http://localhost:${PORT}/api/ports`);
+      if (res.ok) {
+        clearInterval(check);
+        // Give server a moment to stabilize
+        setTimeout(() => {
+          createWindow();
+          createTray();
+        }, 500);
+      }
     } catch {}
-  }, 200);
+  }, 500);
 });
 
 app.on('window-all-closed', () => {

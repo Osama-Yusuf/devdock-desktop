@@ -82,11 +82,22 @@
       background: radial-gradient(ellipse, rgba(59, 130, 246, 0.06) 0%, rgba(139, 92, 246, 0.03) 40%, transparent 70%);
     }
 
+    /* Draggable title bar for Electron */
+    .titlebar {
+      height: 38px;
+      -webkit-app-region: drag;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
     .card {
       width: 100%;
       min-height: 100vh;
       background: transparent;
-      padding: 24px 32px 40px;
+      padding: 52px 32px 40px;
       position: relative;
       z-index: 1;
     }
@@ -144,6 +155,11 @@
     @keyframes livePulse {
       0%, 100% { box-shadow: 0 0 6px rgba(34, 197, 94, 0.6); }
       50% { box-shadow: 0 0 14px rgba(34, 197, 94, 1); }
+    }
+
+    /* Prevent drag on interactive elements inside titlebar area */
+    button, a, input, select, .badge, .btn, .btn-icon, .logo-area, .header-actions {
+      -webkit-app-region: no-drag;
     }
 
     .btn {

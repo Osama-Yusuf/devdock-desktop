@@ -78,9 +78,21 @@
       width: 100%;
       min-height: 100vh;
       background: transparent;
-      padding: 24px 32px 40px;
+      padding: 52px 32px 40px;
       position: relative;
       z-index: 1;
+    }
+
+    .titlebar {
+      height: 38px;
+      -webkit-app-region: drag;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    button, a, input, select, .badge, .btn, .btn-icon, .logo-area, .header-actions {
+      -webkit-app-region: no-drag;
     }
 
     tbody tr { transition: background 0.2s; }
