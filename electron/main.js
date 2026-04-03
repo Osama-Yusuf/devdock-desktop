@@ -7,17 +7,10 @@ let mainWindow = null;
 let tray = null;
 let serverProcess = null;
 
-// Single instance lock
-const gotLock = app.requestSingleInstanceLock();
-if (!gotLock) {
-  app.quit();
-} else {
-  app.on('second-instance', () => {
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    }
-  });
+// Single instance lock — kill the duplicate immediately
+if (!app.requestSingleInstanceLock()) {
+  app.exit(0);
+  process.exit(0);
 }
 
 function getResourcePath(file) {
@@ -28,24 +21,22 @@ function getResourcePath(file) {
 }
 
 function startServer() {
-  const serverPath = getResourcePath('server.js');
-
-  // Use the system node if available, otherwise use Electron's bundled node
-  serverProcess = spawn(process.execPath, ['--no-warnings', serverPath], {
-    env: {
-      ...process.env,
-      ELECTRON: '1',
-      ELECTRON_RUN_AS_NODE: '1',  // Makes Electron binary act as plain Node
-    },
+  serverProcess = spawn(process.execPath, ['--no-warnings', getResourcePath('server.js')], {
+    env: { ...process.env, ELECTRON: '1', ELECTRON_RUN_AS_NODE: '1' },
     stdio: ['pipe', 'pipe', 'pipe'],
   });
-
   serverProcess.stdout?.on('data', (d) => process.stdout.write(d));
   serverProcess.stderr?.on('data', (d) => process.stderr.write(d));
   serverProcess.on('error', (err) => console.error('Server error:', err));
 }
 
 function createWindow() {
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
+    return;
+  }
+
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 850,
@@ -54,55 +45,36 @@ function createWindow() {
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 16, y: 12 },
     backgroundColor: '#020617',
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-    },
+    webPreferences: { nodeIntegration: false, contextIsolation: true },
     show: false,
   });
 
   mainWindow.loadURL(`http://localhost:${PORT}`);
 
-  // Open external links in default browser, not Electron
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('http')) {
-      require('electron').shell.openExternal(url);
-    }
+    if (url.startsWith('http')) require('electron').shell.openExternal(url);
     return { action: 'deny' };
   });
 
-  // Wait for page to fully render before showing
   mainWindow.webContents.on('did-finish-load', () => {
     setTimeout(() => {
-      if (mainWindow && !mainWindow.isVisible()) {
-        mainWindow.show();
-      }
+      if (mainWindow && !mainWindow.isVisible()) mainWindow.show();
     }, 300);
   });
 
   mainWindow.on('close', (e) => {
-    // Hide to tray instead of quitting
-    if (!app.isQuitting) {
-      e.preventDefault();
-      mainWindow.hide();
-    }
+    if (!app.isQuitting) { e.preventDefault(); mainWindow.hide(); }
   });
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
+  mainWindow.on('closed', () => { mainWindow = null; });
 }
 
 function createTray() {
+  if (tray) return;
+
   const iconPath = getResourcePath('assets/trayTemplate.png');
-  const icon2xPath = getResourcePath('assets/trayTemplate@2x.png');
-  let trayIcon = nativeImage.createFromPath(iconPath);
-  // Add @2x for retina
-  if (require('fs').existsSync(icon2xPath)) {
-    const icon2x = nativeImage.createFromPath(icon2xPath);
-    trayIcon.addRepresentation({ scaleFactor: 2.0, buffer: icon2x.toPNG() });
-  }
-  trayIcon = trayIcon.resize({ width: 18, height: 18 });
+  const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 18, height: 18 });
+  trayIcon.setTemplateImage(true);
   tray = new Tray(trayIcon);
 
   updateTrayMenu(0);
@@ -110,15 +82,10 @@ function createTray() {
 
   tray.on('click', () => {
     if (mainWindow) {
-      if (mainWindow.isVisible()) {
-        mainWindow.focus();
-      } else {
-        mainWindow.show();
-      }
+      mainWindow.isVisible() ? mainWindow.focus() : mainWindow.show();
     }
   });
 
-  // Poll port count for tray
   setInterval(async () => {
     try {
       const res = await fetch(`http://localhost:${PORT}/api/ports`);
@@ -129,80 +96,55 @@ function createTray() {
 }
 
 function updateTrayMenu(count) {
+  if (!tray) return;
   const contextMenu = Menu.buildFromTemplate([
     { label: `DevDock — ${count} listener${count !== 1 ? 's' : ''}`, enabled: false },
     { type: 'separator' },
-    {
-      label: 'Show Dashboard',
-      click: () => {
-        if (mainWindow) mainWindow.show();
-        else createWindow();
-      },
-    },
-    {
-      label: 'Open History',
-      click: () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.loadURL(`http://localhost:${PORT}/history`);
-        }
-      },
-    },
+    { label: 'Show Dashboard', click: () => { if (mainWindow) mainWindow.show(); else createWindow(); } },
+    { label: 'Open History', click: () => { if (mainWindow) { mainWindow.show(); mainWindow.loadURL(`http://localhost:${PORT}/history`); } } },
     { type: 'separator' },
-    {
-      label: 'Launch at Startup',
-      type: 'checkbox',
-      checked: app.getLoginItemSettings().openAtLogin,
-      click: (item) => {
-        app.setLoginItemSettings({ openAtLogin: item.checked });
-      },
-    },
+    { label: 'Launch at Startup', type: 'checkbox', checked: app.getLoginItemSettings().openAtLogin, click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked }) },
     { type: 'separator' },
-    {
-      label: 'Quit DevDock',
-      click: () => {
-        app.isQuitting = true;
-        app.quit();
-      },
-    },
+    { label: 'Quit DevDock', click: () => { app.isQuitting = true; app.quit(); } },
   ]);
   tray.setContextMenu(contextMenu);
   tray.setToolTip(`DevDock — ${count} listener${count !== 1 ? 's' : ''}`);
 }
 
+// ── App lifecycle ────────────────────────────────────────────────────
+
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  }
+});
+
 app.whenReady().then(() => {
   startServer();
 
-  // Wait for server to be fully ready
+  let started = false;
   const check = setInterval(async () => {
+    if (started) return;
     try {
       const res = await fetch(`http://localhost:${PORT}/api/ports`);
       if (res.ok) {
+        started = true;
         clearInterval(check);
-        // Give server a moment to stabilize
-        setTimeout(() => {
-          createWindow();
-          createTray();
-        }, 500);
+        setTimeout(() => { createWindow(); createTray(); }, 500);
       }
     } catch {}
   }, 500);
 });
 
 app.on('window-all-closed', () => {
-  // Don't quit on macOS — tray keeps running
-  if (process.platform !== 'darwin') {
-    app.isQuitting = true;
-    app.quit();
-  }
+  if (process.platform !== 'darwin') { app.isQuitting = true; app.quit(); }
 });
 
 app.on('activate', () => {
-  if (mainWindow) {
-    mainWindow.show();
-  } else {
-    createWindow();
-  }
+  if (mainWindow) mainWindow.show();
+  else createWindow();
 });
 
 app.on('before-quit', () => {
