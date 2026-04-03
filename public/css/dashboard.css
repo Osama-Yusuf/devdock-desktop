@@ -125,8 +125,12 @@
     }
 
     html[data-theme="light"] .logo {
-      background: rgba(0, 0, 0, 0.05);
-      border-color: rgba(0, 0, 0, 0.08);
+      background: rgba(15, 23, 42, 0.08);
+      border-color: rgba(15, 23, 42, 0.1);
+    }
+
+    html[data-theme="light"] .logo svg rect:not([fill="#22c55e"]) {
+      fill: #1e293b;
     }
 
     @keyframes logoShimmer {

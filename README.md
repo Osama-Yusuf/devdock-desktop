@@ -2,6 +2,12 @@
 
 A native desktop app to monitor, manage, and control all dev processes listening on TCP ports. Built with Electron, wrapping the [DevDock web app](https://github.com/Osama-Yusuf/devdock-webapp).
 
+## Download
+
+**[Download DevDock v1.0.0 for macOS (Apple Silicon)](https://github.com/Osama-Yusuf/devdock-desktop/releases/download/v1.0.0/DevDock-1.0.0-arm64.dmg)**
+
+> This build is unsigned. On first launch, right-click the app and select "Open" to bypass Gatekeeper.
+
 ## Features
 
 Everything from the web app, plus:
