@@ -63,7 +63,11 @@ function createWindow() {
   });
 
   mainWindow.on('close', (e) => {
-    if (!app.isQuitting) { e.preventDefault(); mainWindow.hide(); }
+    if (!app.isQuitting) {
+      e.preventDefault();
+      mainWindow.hide();
+      app.dock?.hide(); // Remove from Cmd+Tab and dock
+    }
   });
 
   mainWindow.on('closed', () => { mainWindow = null; });
@@ -82,7 +86,13 @@ function createTray() {
 
   tray.on('click', () => {
     if (mainWindow) {
-      mainWindow.isVisible() ? mainWindow.focus() : mainWindow.show();
+      if (mainWindow.isVisible()) {
+        mainWindow.focus();
+      } else {
+        app.dock?.show();
+        mainWindow.show();
+        mainWindow.focus();
+      }
     }
   });
 
@@ -100,8 +110,8 @@ function updateTrayMenu(count) {
   const contextMenu = Menu.buildFromTemplate([
     { label: `DevDock — ${count} listener${count !== 1 ? 's' : ''}`, enabled: false },
     { type: 'separator' },
-    { label: 'Show Dashboard', click: () => { if (mainWindow) mainWindow.show(); else createWindow(); } },
-    { label: 'Open History', click: () => { if (mainWindow) { mainWindow.show(); mainWindow.loadURL(`http://localhost:${PORT}/history`); } } },
+    { label: 'Show Dashboard', click: () => { app.dock?.show(); if (mainWindow) { mainWindow.show(); mainWindow.focus(); } else createWindow(); } },
+    { label: 'Open History', click: () => { app.dock?.show(); if (mainWindow) { mainWindow.show(); mainWindow.focus(); mainWindow.loadURL(`http://localhost:${PORT}/history`); } } },
     { type: 'separator' },
     { label: 'Launch at Startup', type: 'checkbox', checked: app.getLoginItemSettings().openAtLogin, click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked }) },
     { type: 'separator' },
