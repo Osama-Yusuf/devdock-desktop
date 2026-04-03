@@ -94,14 +94,15 @@ function createWindow() {
 }
 
 function createTray() {
-  const iconPath = path.join(__dirname, '..', 'assets', 'trayTemplate.png');
-  let trayIcon;
-  if (require('fs').existsSync(iconPath)) {
-    trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 18, height: 18 });
-  } else {
-    // Fallback: use app icon
-    trayIcon = nativeImage.createEmpty();
+  const iconPath = getResourcePath('assets/trayTemplate.png');
+  const icon2xPath = getResourcePath('assets/trayTemplate@2x.png');
+  let trayIcon = nativeImage.createFromPath(iconPath);
+  // Add @2x for retina
+  if (require('fs').existsSync(icon2xPath)) {
+    const icon2x = nativeImage.createFromPath(icon2xPath);
+    trayIcon.addRepresentation({ scaleFactor: 2.0, buffer: icon2x.toPNG() });
   }
+  trayIcon = trayIcon.resize({ width: 18, height: 18 });
   tray = new Tray(trayIcon);
 
   updateTrayMenu(0);
