@@ -84,16 +84,9 @@ function createTray() {
   updateTrayMenu(0);
   tray.setToolTip('DevDock');
 
+  // Right-click or left-click both show the context menu
   tray.on('click', () => {
-    if (mainWindow) {
-      if (mainWindow.isVisible()) {
-        mainWindow.focus();
-      } else {
-        app.dock?.show();
-        mainWindow.show();
-        mainWindow.focus();
-      }
-    }
+    tray.popUpContextMenu();
   });
 
   setInterval(async () => {
