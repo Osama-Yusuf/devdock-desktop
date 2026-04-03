@@ -113,26 +113,32 @@
     }
 
     // ── Notifications ────────────────────────────────────────────────
+    let notifiedPorts = new Set();  // track what we already notified about
+    let notifyReady = false;        // skip until first stable load
+
     function checkNotifications() {
       if (!currentSettings.notifications) return;
-      if (previousPorts.length === 0) return; // skip first load
+      if (!notifyReady) return;
 
-      const prevSet = new Set(previousPorts.map(p => p.port));
       const currSet = new Set(allPorts.map(p => p.port));
 
-      // New ports
+      // New ports we haven't notified about
       allPorts.forEach(p => {
-        if (!prevSet.has(p.port)) {
+        if (!notifiedPorts.has(p.port)) {
           notify(`Port ${p.port} is up`, `${p.runtimeName} process started (${p.command})`);
         }
       });
 
-      // Gone ports
-      previousPorts.forEach(p => {
-        if (!currSet.has(p.port)) {
-          notify(`Port ${p.port} is down`, `${p.runtimeName} process stopped`);
+      // Ports that disappeared
+      notifiedPorts.forEach(port => {
+        if (!currSet.has(port)) {
+          const prev = previousPorts.find(p => p.port === port);
+          notify(`Port ${port} is down`, prev ? `${prev.runtimeName} process stopped` : 'Process stopped');
         }
       });
+
+      // Update tracked set to current state
+      notifiedPorts = new Set(currSet);
     }
 
     function notify(title, body) {
@@ -509,7 +515,7 @@
     }
 
     // ── Load ports ───────────────────────────────────────────────────
-    function handlePortsData(data) {
+    function handlePortsData(data, fromWS) {
       if (isAnyMenuOpen()) return;
 
       previousPorts = [...allPorts];
@@ -517,7 +523,9 @@
 
       countEl.textContent = allPorts.length;
 
-      checkNotifications();
+      // Only check notifications on WebSocket updates (not initial HTTP load)
+      if (fromWS) checkNotifications();
+
       updateFilters();
       updateRuntimePills();
       renderTable();
@@ -528,7 +536,12 @@
       try {
         const res = await fetch('/api/ports');
         const data = await res.json();
-        handlePortsData(data);
+        handlePortsData(data, false);
+        // After first successful load, seed the notified set and enable notifications
+        if (!notifyReady) {
+          notifiedPorts = new Set(allPorts.map(p => p.port));
+          notifyReady = true;
+        }
       } catch (err) {
         console.error('Failed to load ports', err);
       }
@@ -541,7 +554,7 @@
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === 'ports') handlePortsData(data);
+          if (data.type === 'ports') handlePortsData(data, true);
         } catch {}
       };
 
