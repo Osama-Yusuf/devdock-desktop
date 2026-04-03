@@ -1,6 +1,6 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
-const { fork } = require('child_process');
+const { spawn } = require('child_process');
 
 const PORT = 4003;
 let mainWindow = null;
@@ -20,14 +20,29 @@ if (!gotLock) {
   });
 }
 
+function getResourcePath(file) {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'app.asar.unpacked', file);
+  }
+  return path.join(__dirname, '..', file);
+}
+
 function startServer() {
-  serverProcess = fork(path.join(__dirname, '..', 'server.js'), [], {
-    env: { ...process.env, ELECTRON: '1' },
-    silent: true,
+  const serverPath = getResourcePath('server.js');
+
+  // Use the system node if available, otherwise use Electron's bundled node
+  serverProcess = spawn(process.execPath, ['--no-warnings', serverPath], {
+    env: {
+      ...process.env,
+      ELECTRON: '1',
+      ELECTRON_RUN_AS_NODE: '1',  // Makes Electron binary act as plain Node
+    },
+    stdio: ['pipe', 'pipe', 'pipe'],
   });
 
   serverProcess.stdout?.on('data', (d) => process.stdout.write(d));
   serverProcess.stderr?.on('data', (d) => process.stderr.write(d));
+  serverProcess.on('error', (err) => console.error('Server error:', err));
 }
 
 function createWindow() {

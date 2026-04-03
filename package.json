@@ -19,6 +19,16 @@
       "icon": "assets/icon.icns",
       "target": ["dmg", "zip"]
     },
+    "dmg": {
+      "title": "DevDock",
+      "icon": "assets/icon.icns",
+      "iconSize": 100,
+      "contents": [
+        { "x": 180, "y": 170 },
+        { "x": 480, "y": 170, "type": "link", "path": "/Applications" }
+      ],
+      "window": { "width": 660, "height": 400 }
+    },
     "win": {
       "icon": "assets/icon.ico",
       "target": ["nsis"]
@@ -27,6 +37,13 @@
       "icon": "assets/icon.png",
       "target": ["AppImage", "deb"]
     },
+    "asar": true,
+    "asarUnpack": [
+      "server.js",
+      "public/**/*",
+      "views/**/*",
+      "node_modules/**/*"
+    ],
     "files": [
       "electron/**/*",
       "server.js",
