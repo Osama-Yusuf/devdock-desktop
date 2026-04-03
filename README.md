@@ -6,7 +6,11 @@ A native desktop app to monitor, manage, and control all dev processes listening
 
 **[Download DevDock v1.0.0 for macOS (Apple Silicon)](https://github.com/Osama-Yusuf/devdock-desktop/releases/download/v1.0.0/DevDock-1.0.0-arm64.dmg)**
 
-> This build is unsigned. On first launch, right-click the app and select "Open" to bypass Gatekeeper.
+> **macOS Gatekeeper:** This build is unsigned. After installing, run this in terminal:
+> ```bash
+> xattr -cr /Applications/DevDock.app
+> ```
+> Then open the app normally.
 
 ## Features
 
