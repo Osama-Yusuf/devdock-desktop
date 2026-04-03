@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DevDock</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body>
+  <div class="card">
+    <div class="inner">
+      <!-- Header -->
+      <div class="card-header">
+        <div class="logo-area">
+          <div class="logo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="4" width="12" height="2.5" rx="1.2" fill="#fff" opacity="0.9"/>
+              <rect x="3" y="9" width="18" height="2.5" rx="1.2" fill="#22c55e"/>
+              <rect x="3" y="14" width="8" height="2.5" rx="1.2" fill="#fff" opacity="0.4"/>
+              <rect x="3" y="19" width="14" height="2.5" rx="1.2" fill="#fff" opacity="0.2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="title">DevDock</div>
+            <div class="subtitle">All your dev processes, one dashboard</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="badge" title="Real-time updates via WebSocket"><span class="badge-dot"></span> Live</div>
+
+
+          <!-- History -->
+          <button class="btn-icon" id="historyBtn" title="Port history" onclick="window.location.href='/history'">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </button>
+
+          <!-- Group toggle -->
+          <button class="btn-icon" id="groupToggle" title="Group by project">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </button>
+
+          <!-- Export -->
+          <div class="export-wrapper">
+            <button class="btn-icon" id="exportBtn" title="Export">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+            <div class="export-menu" id="exportMenu">
+              <button onclick="exportAs('markdown')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Markdown
+              </button>
+              <button onclick="exportAs('json')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                JSON
+              </button>
+              <button onclick="exportAs('csv')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Theme toggle -->
+          <button class="btn-icon" id="themeToggle" title="Toggle theme">
+            <span id="themeIcon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </span>
+          </button>
+
+          <!-- Settings -->
+          <button class="btn-icon" id="settingsBtn" title="Settings (S)" style="color:#c4b5fd;border-color:rgba(139,92,246,0.4);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stats-left">
+          <div class="stat">
+            <span class="stat-value" id="count">0</span>
+            <span class="stat-label">listeners</span>
+          </div>
+          <div class="runtime-pills" id="runtimePills"></div>
+        </div>
+      </div>
+
+      <!-- Search & filter -->
+      <div class="search-filter-row">
+        <div class="search-box">
+          <span class="search-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search ports, PIDs, processes, paths... ( / )" />
+        </div>
+        <div class="filter-group">
+          <select class="filter-select" id="runtimeFilter"><option value="all">All Runtimes</option></select>
+          <button class="clear-btn" id="clearBtn">Clear</button>
+        </div>
+        <div class="result-info" id="resultInfo"></div>
+      </div>
+
+      <!-- Table -->
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:30px;"></th>
+              <th class="sortable" data-column="port">Port</th>
+              <th>Health</th>
+              <th class="sortable" data-column="pid">PID</th>
+              <th class="sortable col-user" data-column="user">User</th>
+              <th class="sortable col-cmd" data-column="command">Process</th>
+              <th class="sortable" data-column="runtimeName">Runtime</th>
+              <th class="sortable col-path" data-column="scriptPath">Path</th>
+              <th class="sortable" data-column="cpu">CPU</th>
+              <th class="sortable" data-column="rss">MEM</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="skeleton-row"><td><div class="skeleton-bar" style="width:16px"></div></td><td><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:10px;border-radius:50%"></div></td><td><div class="skeleton-bar" style="width:48px"></div></td><td class="col-user"><div class="skeleton-bar" style="width:70px"></div></td><td class="col-cmd"><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:72px"></div></td><td class="col-path"><div class="skeleton-bar" style="width:180px"></div></td><td><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:50px"></div></td><td><div class="skeleton-bar" style="width:24px"></div></td></tr>
+            <tr class="skeleton-row"><td><div class="skeleton-bar" style="width:16px"></div></td><td><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:10px;border-radius:50%"></div></td><td><div class="skeleton-bar" style="width:48px"></div></td><td class="col-user"><div class="skeleton-bar" style="width:70px"></div></td><td class="col-cmd"><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:72px"></div></td><td class="col-path"><div class="skeleton-bar" style="width:140px"></div></td><td><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:50px"></div></td><td><div class="skeleton-bar" style="width:24px"></div></td></tr>
+            <tr class="skeleton-row"><td><div class="skeleton-bar" style="width:16px"></div></td><td><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:10px;border-radius:50%"></div></td><td><div class="skeleton-bar" style="width:48px"></div></td><td class="col-user"><div class="skeleton-bar" style="width:70px"></div></td><td class="col-cmd"><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:72px"></div></td><td class="col-path"><div class="skeleton-bar" style="width:160px"></div></td><td><div class="skeleton-bar" style="width:40px"></div></td><td><div class="skeleton-bar" style="width:50px"></div></td><td><div class="skeleton-bar" style="width:24px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty" id="emptyState" style="display:none;"></div>
+
+      <!-- Pro tips & shortcuts -->
+      <div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--border-row);display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:0.72rem;color:var(--accent);font-weight:500;">Pro tips</span>
+        <span style="font-size:0.7rem;color:var(--text-dim);">Click <strong style="color:var(--text-muted);">Port</strong> to open in browser</span>
+        <span style="font-size:0.7rem;color:var(--text-dim);">Click <strong style="color:var(--text-muted);">PID</strong> to copy</span>
+        <span style="font-size:0.7rem;color:var(--text-dim);">Click <strong style="color:var(--text-muted);">Path</strong> to open terminal</span>
+        <span style="width:1px;height:12px;background:var(--border);"></span>
+        <span style="font-size:0.7rem;color:var(--text-dim);"><kbd style="font-family:var(--mono);padding:1px 5px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);font-size:0.65rem;">/</kbd> Search</span>
+        <span style="font-size:0.7rem;color:var(--text-dim);"><kbd style="font-family:var(--mono);padding:1px 5px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);font-size:0.65rem;">S</kbd> Settings</span>
+        <span style="font-size:0.7rem;color:var(--text-dim);"><kbd style="font-family:var(--mono);padding:1px 5px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);font-size:0.65rem;">G</kbd> Group</span>
+        <span style="font-size:0.7rem;color:var(--text-dim);"><kbd style="font-family:var(--mono);padding:1px 5px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);font-size:0.65rem;">H</kbd> History</span>
+        <span style="font-size:0.7rem;color:var(--text-dim);"><kbd style="font-family:var(--mono);padding:1px 5px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);font-size:0.65rem;">T</kbd> Theme</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Settings Modal ────────────────────────────────────────── -->
+  <div class="menu-backdrop" id="menuBackdrop"></div>
+  <div class="actions-menu" id="floatingMenu"></div>
+
+  <div id="settingsModal" style="display:none;">
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">Settings</div>
+          <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-title section-collapsible" id="runtimeSectionToggle" style="cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none;">
+            <span class="section-chevron" style="font-size:0.65rem;color:var(--text-dim);transition:transform 0.2s;display:inline-block;">&#9654;</span>
+            Runtime Detection
+          </div>
+          <div class="section-desc">Toggle which process types to monitor. Disable runtimes you don't use to reduce noise.</div>
+          <div id="runtimeSectionBody" style="display:none;">
+            <div class="bulk-actions">
+              <button class="bulk-btn" id="enableAll">Enable All</button>
+              <button class="bulk-btn" id="disableAll">Disable All</button>
+            </div>
+            <div id="runtimeToggles"></div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-title">Grouping</div>
+          <div class="section-desc">Configure how processes are grouped when using the Group view.</div>
+          <div class="settings-row">
+            <div><label>Grouping depth</label><div class="sub">How many path segments to trim. 1 = parent dir (e.g. /repos/myapp), 2 = grandparent.</div></div>
+            <select class="refresh-select" id="groupingDepth">
+              <option value="1">1 (parent)</option>
+              <option value="2">2 (grandparent)</option>
+              <option value="3">3</option>
+              <option value="0">0 (exact path)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-title">History</div>
+          <div class="settings-row">
+            <div><label>Remember stopped processes</label><div class="sub">Keep a record of previously discovered ports</div></div>
+            <label class="toggle"><input type="checkbox" id="showHistoryToggle" /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div><label>Clear all history</label><div class="sub">Remove all stored port records</div></div>
+            <button class="bulk-btn" id="clearHistory" style="color:#fca5a5;border-color:rgba(239,68,68,0.4);">Clear</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-title">General</div>
+          <div class="settings-row">
+            <div><label>Show unrecognized processes</label><div class="sub">Display processes that don't match any known runtime</div></div>
+            <label class="toggle"><input type="checkbox" id="showOther" /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div><label>Desktop notifications</label><div class="sub">Notify when ports come up or go down</div></div>
+            <label class="toggle"><input type="checkbox" id="notificationsToggle" /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div><label>Show export button</label><div class="sub">Enable export to Markdown, JSON, CSV</div></div>
+            <label class="toggle"><input type="checkbox" id="showExportToggle" /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-cancel" id="settingsCancel">Cancel</button>
+          <button class="btn-save" id="settingsSave">Save Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

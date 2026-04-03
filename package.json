@@ -1,0 +1,46 @@
+{
+  "name": "devdock-desktop",
+  "version": "1.0.0",
+  "description": "DevDock Desktop — Monitor, manage, and control all dev processes listening on TCP ports",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.devdock.desktop",
+    "productName": "DevDock",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "assets/icon.icns",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": ["nsis"]
+    },
+    "linux": {
+      "icon": "assets/icon.png",
+      "target": ["AppImage", "deb"]
+    },
+    "files": [
+      "electron/**/*",
+      "server.js",
+      "public/**/*",
+      "views/**/*",
+      "node_modules/**/*"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.19.0",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}
